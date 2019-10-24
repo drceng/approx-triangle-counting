@@ -1,7 +1,17 @@
 # approx-triangle-counting
 
 Approximating the number of triangles in a graph by sampling a small number of
-"low-hinge" wedges.
+"low-hinge" wedges. Compile using the below command:
+
+```bash
+g++ -o atc graph.cpp approx_triangle_counting.cpp
+```
+
+Usage:
+
+```bash
+./atc list-of-edges.txt 
+```
 
 ## Standard Wedge Sampling
 
