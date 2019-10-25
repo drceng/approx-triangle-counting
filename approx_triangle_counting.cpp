@@ -31,15 +31,27 @@ void record_time(struct timeval &t_begin) {
 	t_begin = t_end;
 }
 
-void wedge_sampling(Graph *g, int overcount) {
+void edge_based_wedge_sampling(Graph *g, EdgeList *el, double prob) {
+	int64_t r = 0;
+
+	for (Edge e : el->E) {
+		int64_t low_deg = g->random_triangle_including(e);
+		r += low_deg;
+	}
+
+	double t = r / (3 * prob);
+	printf("Approximate number of triangles = %ld\n", int64_t(t + 0.5));
+}
+
+int64_t wedge_sampling(Graph *g, int overcount) {
 	int64_t w = g->assign_weights();
 	printf("Number of all wedges = %ld\n", w);
 
-	int64_t num_trials = 1000;
+	int64_t num_trials = 2500;
 	int64_t num_closed = 0;
 
 	while (num_closed < 2500) {
-		num_trials *= 10;
+		num_trials *= 2;
 		num_closed = count_closed_wedges(g, num_trials);
 		printf("Number of closed/total sampled wedges = %ld/%ld\n", num_closed, num_trials);
 	}
@@ -47,6 +59,8 @@ void wedge_sampling(Graph *g, int overcount) {
 	double r = num_closed / (double) num_trials;
 	double t = r * w / overcount;
 	printf("Approximate number of triangles = %ld, approximate ratio = %lf\n", int64_t(t + 0.5), r);
+
+	return num_trials;
 }
 
 int main(int argc,char** argv) {
@@ -67,7 +81,6 @@ int main(int argc,char** argv) {
 	// PHASE 2 : Convert to adjacency list representation
 	printf("Creating adjacency lists\n");
 	g = new Graph(*el);
-	delete el; // No need for the list of edges anymore
 	record_time(t1);
 
 	//// BEGIN ALTERNATIVE PHASE 3
@@ -79,9 +92,21 @@ int main(int argc,char** argv) {
 
 	// PHASE 3-b : Standard wedge sampling
 	printf("Appoximating the number of triangles:\n");
-	wedge_sampling(g, 3);
+	int64_t num_trials = wedge_sampling(g, 3);
+	record_time(t1);
+
+	// PHASE 3-c : Edge-based wedge sampling
+	printf("EDGE-BASED WEDGE SAMPLING:\n");
+	double prob = (double)num_trials / el->m;
+	EdgeList *sub_el = el->subgraph(prob);
+	printf("Number of edges in the subgraph = %ld\n", sub_el->m);
+
+	edge_based_wedge_sampling(g, sub_el, prob);
 	record_time(t1);
 	//// END ALTERNATIVE PHASE 3
+
+	delete el; // No need for the list of edges anymore
+	delete sub_el; // No need for the subgraph either
 
 	// PHASE 3-a : Compute a degeneracy ordering, direct edges, and relabel vertices
 	printf("LOW-HINGE WEDGE SAMPLING:\n");

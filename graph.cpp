@@ -154,6 +154,26 @@ int64_t Graph::assign_weights() {
 	return cwt;
 }
 
+// extend given edge to a random wedge from the low-degree end-vertex
+// if this wedge is closed then return (low-degree - 1) else return 0
+int64_t Graph::random_triangle_including(Edge e) {
+	int64_t s, t;
+	if (d[e.s] <= d[e.t]) {
+		s = e.s;
+		t = e.t;
+	} else {
+		s = e.t;
+		t = e.s;
+	}
+	if (d[s] < 2) return 0;
+
+	int64_t i = rand() % (d[s] - 1);
+	int64_t u = adj[cd[s] + i];
+	if (t <= u) u = adj[cd[s] + i + 1];
+
+	return adjacent(t, u) ? (d[s] - 1) : 0;
+}
+
 // pick a random wedge and check whether it is closed or not
 bool Graph::closed_random_wedge(){
 	int64_t v = random_vertex();
