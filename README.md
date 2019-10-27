@@ -13,7 +13,7 @@ Usage:
 ./atc list-of-edges.txt 
 ```
 
-## Standard Wedge Sampling
+## Standard Wedge Sampling [1]
 
 Our algorithm improves on the standard technique of sampling adjacent edge
 pairs (wedges) uniformly at random for approximating the number of triangles.
@@ -39,7 +39,7 @@ Output *T = r W / 3* as an approximation of the total number of triangles.
 Here, division by 3 is essential since each triangle can be counted by 3
 different wedges.
 
-## Low-Hinge Wedge Sampling
+## Low-Hinge Wedge Sampling [2]
 
 ### Main Idea
 
@@ -98,3 +98,78 @@ ratio of closed-to-total low-hinge wedges is much higher than *C*, and this
 ratio is approximated by *r<sup>+</sup>* above. Consequently, we observe that
 the low-hinge wedge sampling method requires much fewer samples than the
 standard wedge sampling method in order to achieve similar error bounds.
+
+## Edge-Based Wedge Sampling [3]
+
+We also implement another recently proposed method for approximating triangle
+counts in large graphs and that is the edge-based wedge sampling method, which
+can be summarized as follows:
+
+- Given *G = (V,E)*, pick every edge in *E* with probability *p*.
+
+- For each picked edge *e*, consider the lower degree end-vertex *v* of *e*,
+  and uniformly sample one neighbor out of the remaining *d(v) - 1* neighbors
+of *v* in order to extend *e* into a wedge.
+
+- Check whether the sampled wedge is closed, and if so add *d(v) - 1* to the
+  estimated number of triangles *T<sup>s</sup>*.
+
+Output *T<sup>s</sup> / 3p* as an approximation of the total number of
+triangles. Note that *T<sup>s</sup>* approximates the size of the set *{(v,u,w)
+: (v,u) is picked and (v,w),(u,w) &isin; E}*. Here, the output does require
+division by 3 because a triangle has three edges, each of which can be the edge
+picked in the first step.
+
+This method performs slightly better with respect to the standard wedge
+sampling method but the low-hinge wedge sampling algorithm outperforms all of
+these methods.
+
+## References
+
+[1] 
+C. Seshadhri, Ali Pinar, and Tamara G. Kolda.
+Wedge sampling for computing clustering coefficients and triangle counts on large graphs.
+Statistical Analysis and Data Mining 7, 4 (2014). 294–307.
+
+[2]
+[Ata Turk and Duru Türko&#287;lu.
+Revisiting Wedge Sampling for Triangle Counting.
+In The World Wide Web Conference, WWW 2019. 1875–1885.][WWW]
+
+[3] 
+[Duru Türko&#287;lu and Ata Turk.
+Edge-Based Wedge Sampling to Estimate Triangle Counts in Very Large Graphs.
+In 2017 IEEE International Conference on Data Mining, ICDM 2017. 455–464.][ICDM]
+
+To use our algorithms, we kindly request you to cite as follows (bibtex format):
+
+```
+[2]:
+@inproceedings{Turk:2019,
+  author = {Ata Turk and Duru T{\"{u}}rko{\u{g}}lu},
+  title = {Revisiting Wedge Sampling for Triangle Counting},
+  booktitle = {The World Wide Web Conference},
+  series = {WWW '19},
+  year = {2019},
+  location = {San Francisco, CA, USA},
+  pages = {1875--1885},
+  url = {http://doi.acm.org/10.1145/3308558.3313534},
+  doi = {10.1145/3308558.3313534},
+} 
+```
+
+```
+[3]:
+@inproceedings{Turkoglu:2017,
+  author    = {Duru T{\"{u}}rko{\u{g}}lu and Ata Turk},
+  title     = {Edge-Based Wedge Sampling to Estimate Triangle Counts in Very Large Graphs},
+  booktitle = {2017 {IEEE} International Conference on Data Mining, {ICDM} 2017},
+  pages     = {455--464},
+  year      = {2017}
+  doi = {10.1109/ICDM.2017.55},
+  url = {https://doi.ieeecomputersociety.org/10.1109/ICDM.2017.55},
+}
+```
+
+[WWW]: http://doi.acm.org/10.1145/3308558.3313534
+[ICDM]: https://doi.ieeecomputersociety.org/10.1109/ICDM.2017.55
